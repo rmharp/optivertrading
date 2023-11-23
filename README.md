@@ -5,4 +5,6 @@ Group 13
 - Riley Harper
 - Nithin Sivakumaran
 
+## Polynomial Regression
+## Tree-Based Methods
 ## LSTM
