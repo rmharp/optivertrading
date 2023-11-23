@@ -6,5 +6,8 @@ Group 13
 - Nithin Sivakumaran
 
 ## Polynomial Regression
+
 ## Tree-Based Methods
+
 ## LSTM
+
