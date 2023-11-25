@@ -12,7 +12,7 @@ def collate_fn(data):
 
 
 def main():
-    device = torch.cuda.is_available()
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = OptiverModel()
     model = model.to(device)
     
