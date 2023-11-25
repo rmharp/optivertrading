@@ -37,6 +37,7 @@ def main():
         optimizer.step()
         progress.update()
     progress.close()
+    torch.save(model.state_dict(), './lstm/checkpoints/model.pth')
     
     model.eval()
     loss = 0
