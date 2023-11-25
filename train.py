@@ -16,8 +16,8 @@ def main():
     model = OptiverModel()
     model = model.to(device)
     
-    batch_size = os.environ['BATCH_SIZE']
-    lookback = os.environ['LOOKBACK']
+    batch_size = int(os.environ['BATCH_SIZE'])
+    lookback = int(os.environ['LOOKBACK'])
     train_dataset = OptiverDataset(lookback=lookback, split='train')
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     
