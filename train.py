@@ -44,7 +44,7 @@ def main():
     for x, y in val_dataloader:
         x, y = x.to(device), y.to(device)
         y_pred = model(x)
-        loss += torch.sum(torch.absolute(y_pred - y))
+        loss += torch.sum(torch.absolute(y_pred - y)).item()
         progress.update()
     progress.close()
     print(loss/len(val_dataset))  
