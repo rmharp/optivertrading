@@ -41,7 +41,7 @@ def main():
         progress.update()
     progress.close()
     
-    torch.save(model.state_dict(), './lstm/checkpoints/model.pt')
+    torch.save(model.state_dict(), f"./lstm/checkpoints/model_layers{int(os.environ['LSTM_LAYERS'])}.pt")
     
     model.eval()
     loss = 0
