@@ -1,5 +1,6 @@
 from lstm.lstm import OptiverModel
 from lstm.data import OptiverDataset
+from lstm.neural import OptiverNet
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
 import torch
@@ -16,9 +17,12 @@ def main():
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = OptiverModel()
+    # model = OptiverNet()
     model = model.to(device)
     
     batch_size = 1
+    if 'BATCH_SIZE' in os.environ:
+        batch_size = int(os.environ['BATCH_SIZE'])
     
     train_dataset = OptiverDataset(split='train')
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
