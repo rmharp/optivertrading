@@ -1,2 +1,4 @@
 optiver-trading-at-the-close/train.csv
 *.pyc
+sandbox.py
+*.pt
