@@ -11,7 +11,8 @@ class OptiverDataset(Dataset):
     
     def __init__(self, split=None):
         data = pd.read_csv(f'{os.getcwd()}/optiver-trading-at-the-close/train.csv')
-        data = data.fillna(0)
+        data = data.dropna()
+        data=(data-data.mean())/data.std()
         relevant_features = ['imbalance_size', 'imbalance_buy_sell_flag','reference_price',
                             'matched_size','far_price','near_price',
                             'bid_price','bid_size','ask_price',
