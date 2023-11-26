@@ -1,6 +1,7 @@
 import pandas as pd
 from torch.utils.data import Dataset
 import torch
+import numpy as np
 import os
 from tqdm import tqdm
 
@@ -8,9 +9,9 @@ from tqdm import tqdm
 
 class OptiverDataset(Dataset):
     
-    def __init__(self, lookback, split=None):
+    def __init__(self, split=None):
         data = pd.read_csv(f'{os.getcwd()}/optiver-trading-at-the-close/train.csv')
-        
+        data = data.fillna(0)
         relevant_features = ['imbalance_size', 'imbalance_buy_sell_flag','reference_price',
                             'matched_size','far_price','near_price',
                             'bid_price','bid_size','ask_price',
@@ -29,21 +30,35 @@ class OptiverDataset(Dataset):
         
         self.stocks = []
         self.targets = []
-        self.length = 0
-        self.max_lookback = lookback
+        
         progress = tqdm(total=len(stock_ids), desc='Loading data')
         for stock_id in stock_ids:
             stock_data = groups.get_group(stock_id)[relevant_features].sort_values(by=['time_id'])
-            # target_data = stock_data[["target"]].values.tolist()
-            target_data = stock_data[["target"]].values.tolist()[lookback - 1:]
-            stock_data = stock_data.drop(columns=['target']).values.tolist()
+            target_data = stock_data[["target"]].values
+            stock_data = stock_data.drop(columns=['target']).values
             
-            stacked_stock_data = []
-            # stacked_stock_data += [stock_data[:i+1] for i in range(lookback - 1)]
-            stacked_stock_data += [stock_data[i:i+lookback] for i in range(len(stock_data) - lookback + 1)]
+            self.stocks.append(torch.from_numpy(stock_data))
+            self.targets.append(torch.from_numpy(target_data).squeeze())
             
-            self.stocks += stacked_stock_data
-            self.targets += target_data
+            # if stock_id == 0:
+            #     print(self.stocks[0].shape)
+            #     print(self.targets[0].shape)
+            
+            
+            
+            
+            # stock_data = groups.get_group(stock_id)[relevant_features].sort_values(by=['time_id'])
+            # target_data = stock_data[["target"]].values.tolist()[lookback - 1:]
+            # stock_data = stock_data.drop(columns=['target']).values.tolist()
+            
+            # stacked_stock_data = []
+            # stacked_stock_data += [stock_data[i:i+lookback] for i in range(len(stock_data) - lookback + 1)]
+            
+            # self.stocks += stacked_stock_data
+            # self.targets += target_data
+            
+            
+            
             progress.update()
         progress.close()
         
@@ -51,7 +66,7 @@ class OptiverDataset(Dataset):
         return torch.tensor(l, dtype=torch.float)
     
     def __getitem__(self, index):
-        return self.get_tensor(self.stocks[index]), self.get_tensor(self.targets[index])
+        return self.stocks[index].float(), self.targets[index].float()
     
     def __len__(self):
         return len(self.stocks)
