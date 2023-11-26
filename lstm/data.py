@@ -2,6 +2,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 import torch
 import numpy as np
+from sklearn import preprocessing
 import os
 from tqdm import tqdm
 
@@ -12,7 +13,8 @@ class OptiverDataset(Dataset):
     def __init__(self, split=None):
         data = pd.read_csv(f'{os.getcwd()}/optiver-trading-at-the-close/train.csv')
         data = data.dropna()
-        data=(data-data.mean())/data.std()
+        mean_scaler = preprocessing.StandardScaler()
+        
         relevant_features = ['imbalance_size', 'imbalance_buy_sell_flag','reference_price',
                             'matched_size','far_price','near_price',
                             'bid_price','bid_size','ask_price',
@@ -26,6 +28,8 @@ class OptiverDataset(Dataset):
             stock_ids = list(stock_ids)[int(len(stock_ids) * 0.8):int(len(stock_ids) * 0.9)]
         elif split == 'test':
             stock_ids = list(stock_ids)[int(len(stock_ids) * 0.9):]
+        elif split == 'valid':
+            stock_ids = list(stock_ids)[int(len(stock_ids) * 0.8):]
 
         groups = data.groupby('stock_id')
         
@@ -37,6 +41,8 @@ class OptiverDataset(Dataset):
             stock_data = groups.get_group(stock_id)[relevant_features].sort_values(by=['time_id'])
             target_data = stock_data[["target"]].values
             stock_data = stock_data.drop(columns=['target']).values
+            
+            stock_data = mean_scaler.fit_transform(stock_data)
             
             self.stocks.append(torch.from_numpy(stock_data))
             self.targets.append(torch.from_numpy(target_data).squeeze())
