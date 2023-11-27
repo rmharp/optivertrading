@@ -5,7 +5,7 @@ class OptiverNet(torch.nn.Module):
     def __init__(self, num_layers=10, hidden_size=256):
         super().__init__()
         self.layers = nn.ModuleList()
-        self.layers.append(torch.nn.Linear(12, hidden_size))
+        self.layers.append(torch.nn.Linear(14, hidden_size))
         for i in range(num_layers):
             self.layers.append(torch.nn.Linear(hidden_size, hidden_size))
             self.layers.append(torch.nn.ReLU())

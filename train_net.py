@@ -20,7 +20,12 @@ def main():
     model = OptiverNet()
     model = model.to(device)
     
+    if 'model_net_best.pt' in os.listdir('./lstm/checkpoints'):
+        print('found existing model')
+        model.load_state_dict(torch.load('./lstm/checkpoints/model_net_best.pt', map_location=device))
+    
     batch_size = 1
+    
     if 'BATCH_SIZE' in os.environ:
         batch_size = int(os.environ['BATCH_SIZE'])
     
@@ -32,9 +37,11 @@ def main():
     
     loss_fn = nn.L1Loss()
     optimizer = optim.AdamW(model.parameters(), lr=0.001)
-    num_epochs = 10
+    num_epochs = 50
+    
+    maes = []
     for epoch in range(num_epochs):
-        print(f'Epoch {epoch}')
+        print(f'Epoch {epoch + 1}')
         model.train()
         progress = tqdm(total=len(train_dataloader), desc='Training')
         for x, y in train_dataloader:
@@ -49,7 +56,7 @@ def main():
             progress.update()
         progress.close()
         
-        # torch.save(model.state_dict(), f"./lstm/checkpoints/model_proj{int(os.environ['HIDDEN_SIZE'])}_layers{int(os.environ['LSTM_LAYERS'])}.pt")
+        torch.save(model.state_dict(), f"./lstm/checkpoints/model_net_epoch{epoch + 1}.pt")
         
         model.eval()
         loss = 0
@@ -62,7 +69,10 @@ def main():
             num_items += torch.numel(y_pred)
             progress.update()
         progress.close()
-        print(f'MAE = {loss/num_items}')
+        mae = loss/num_items
+        maes.append(mae)
+        print(f'MAE = {mae}')
+        print(f'Best MAE = {min(maes)}')
 
 if __name__ == '__main__':
     main()

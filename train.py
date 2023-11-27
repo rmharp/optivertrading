@@ -62,7 +62,10 @@ def main():
             num_items += torch.numel(y_pred)
             progress.update()
         progress.close()
-        print(f'MAE = {loss/num_items}')
+        mae = loss/num_items
+        print(f'MAE = {mae}')
+        torch.save(model.state_dict(), f"./lstm/checkpoints/model_loss{mae}_proj{int(os.environ['HIDDEN_SIZE'])}_layers{int(os.environ['LSTM_LAYERS'])}_dropout{float(os.environ['DROPOUT'])}_epoch{epoch+1}.pt")
+
 
 if __name__ == '__main__':
     main()

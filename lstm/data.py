@@ -15,7 +15,7 @@ class OptiverDataset(Dataset):
         data = data.dropna()
         mean_scaler = preprocessing.StandardScaler()
         
-        relevant_features = ['imbalance_size', 'imbalance_buy_sell_flag','reference_price',
+        relevant_features = ['stock_id', 'date_id', 'imbalance_size', 'imbalance_buy_sell_flag','reference_price',
                             'matched_size','far_price','near_price',
                             'bid_price','bid_size','ask_price',
                             'ask_size','wap','time_id',
