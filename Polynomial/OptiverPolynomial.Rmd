@@ -14,6 +14,9 @@ if(!require(knitr)) {install.packages("knitr", repos = "http://cran.us.r-project
 if(!require(caret)) {install.packages("caret", repos = "http://cran.us.r-project.org"); library(caret)}
 if(!require(readr)) {install.packages("readr", repos = "http://cran.us.r-project.org"); library(readr)}
 if (!require(here)) {install.packages("here", repos = "http://cran.us.r-project.org"); library(here)}
+if (!require(gridExtra)) {install.packages("gridExtra"); library(gridExtra)}
+if (!require(grid)) {install.packages("grid"); library(grid)}
+if (!require(mgcv)) {install.packages("mgcv"); library(mgcv)}
 setwd(here())
 ```
 
@@ -27,7 +30,7 @@ colnames(data)
 ```
 
 ```{r}
-set.seed(123) # for reproducibility
+set.seed(123)
 
 # Exclude variables
 predictor_variables <- setdiff(names(data), c("stock_id", "date_id", "seconds_in_bucket", "time_id", "target", "row_id", "imbalance_buy_sell_flag", "seconds_in_bucket"))
@@ -43,14 +46,42 @@ for (var in predictor_variables) {
     formula <- as.formula(paste("target ~ poly(", var, ", ", degree, ")", sep=""))
     
     # Train the model with cross-validation
-    set.seed(123) # for reproducibility
     model <- train(formula, data = data, method = "lm", trControl = control)
     # Store the results
     results <- rbind(results, data.frame(variable = var, degree = degree, MAE = mean(model$results$MAE)))
   }
 }
-# Sort the results based on MSE
+# Sort the results based on MAE
 sorted_results <- results[order(results$MAE), ]
+# Print the top 3 models
+top_3_models <- head(sorted_results, 3)
+print(top_3_models)
+```
+
+```{r}
+set.seed(123)
+predictor_variables <- setdiff(names(data), c("stock_id", "date_id", "seconds_in_bucket", "time_id", "target", "row_id", "imbalance_buy_sell_flag", "seconds_in_bucket"))
+gam_results <- data.frame(variable = character(), edf = numeric(), R.sq = numeric(), p.value = numeric(), MAE = numeric(), stringsAsFactors = FALSE)
+
+# Loop through each predictor variable
+for (var in predictor_variables) {
+  # Create a GAM formula for each variable
+  gam_formula <- as.formula(paste("target ~ s(", var, ")", sep=""))
+  
+  # Fit the GAM model
+  gam_model <- gam(gam_formula, data = data, method = "REML")
+  model_summary <- summary(gam_model)
+  predictions <- predict(gam_model, data)
+  mae <- mean(abs(predictions - data$target))
+
+  gam_results <- rbind(gam_results, data.frame(variable = var, edf = edf, R.sq = r.sq, p.value = p.value, MAE = mae))
+}
+
+# View the results
+gam_results
+
+# Sort the results based on MAE
+sorted_results <- gam_results[order(gam_results$MAE), ]
 # Print the top 3 models
 top_3_models <- head(sorted_results, 3)
 print(top_3_models)
